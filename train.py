@@ -1,6 +1,6 @@
 import torch
 import onmt
-from preprocess import preprocess
+from test_preprocess import preprocess
 
 # Create an NMT model
 def create_model(
@@ -64,7 +64,7 @@ def create_trainer(
     model.to(device)
 
     # Set the optimizer
-    optimizer = onmt.utils.optimizers(
+    optimizer = onmt.utils.Optimizer(
         optimizer = torch.optim.SGD(model.parameters(), lr = 1),
         learning_rate = 1,
         learning_rate_decay_fn = lambda n: 1 if n < 11 else 0.7 ** (n - 10),
@@ -93,9 +93,38 @@ def init():
     is_cuda = torch.cuda.is_available()
     onmt.utils.misc.set_random_seed(1000, is_cuda)
 
+def batch_gen(data, padding_idx = 0, batch_size = 64):
+    pos = 0
+    while pos < len(data):
+        # Get a batch
+        batch = data[pos: pos + batch_size]
+        pos += batch_size
+
+        # Padding
+        length = [len(x["tokens"]) for x in batch]
+        seq_len = max(length)
+        seq = torch.LongTensor([
+            x["tokens"] + [padding_idx] * (seq_len - len(x["tokens"]))
+                for x in batch
+        ])
+
+        yield seq
+
 def main():
     init()
-    trainer = create_trainer()
+    train_iter, valid_iter, encoder_vocab, decoder_vocab = preprocess()
+    trainer = create_trainer(
+        encoder_vocab = encoder_vocab,
+        decoder_vocab = decoder_vocab,
+        device = 'cuda' if torch.cuda.is_available() else 'cpu'
+    )
+
+    trainer.train(
+        train_iter = train_iter,
+        train_steps = 1000,
+        valid_iter = valid_iter,
+        valid_steps = 500,
+    )
 
 if __name__ == '__main__':
     main()

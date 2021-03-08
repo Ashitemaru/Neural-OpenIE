@@ -17,7 +17,7 @@ def split_dataset(data_file, triple_file, train_num = None):
 
     # Handle lines in the data file
     for i, line in enumerate(lines):
-        if i < train_num or train_num == None:
+        if train_num == None or i < train_num:
             train_data.append(line)
         else:
             break
