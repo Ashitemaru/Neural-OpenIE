@@ -4,9 +4,18 @@ import onmt
 from collections import defaultdict, Counter
 from onmt.inputters.corpus import ParallelCorpus
 from onmt.inputters.dynamic_iterator import DynamicDatasetIter
+from onmt.utils.parse import ArgumentParser
+from onmt.opts import dynamic_prepare_opts
+from onmt.bin.build_vocab import build_vocab_main
 
 def preprocess():
     onmt.utils.logging.init_logger()
+
+    parser = ArgumentParser(description = 'build_vocab.py')
+    dynamic_prepare_opts(parser, build_vocab_only = True)
+    base_args = (['-config', 'toy-ende/config.yaml', '-n_sample', '10000'])
+    opts, unknown = parser.parse_known_args(base_args)
+    build_vocab_main(opts)
 
     src_vocab_path = 'toy-ende/run/example.vocab.src'
     tgt_vocab_path = 'toy-ende/run/example.vocab.tgt'
@@ -103,7 +112,7 @@ def preprocess():
     return train_iter, valid_iter, src_vocab, tgt_vocab
 
 def main():
-    pass
+    preprocess()
 
 if __name__ == '__main__':
     main()
