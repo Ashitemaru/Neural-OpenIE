@@ -104,26 +104,17 @@ def init():
     # Init logger
     onmt.utils.logging.init_logger()
 
-def batch_gen(data, padding_idx = 0, batch_size = 64):
-    pos = 0
-    while pos < len(data):
-        # Get a batch
-        batch = data[pos: pos + batch_size]
-        pos += batch_size
-
-        # Padding
-        length = [len(x["tokens"]) for x in batch]
-        seq_len = max(length)
-        seq = torch.LongTensor([
-            x["tokens"] + [padding_idx] * (seq_len - len(x["tokens"]))
-                for x in batch
-        ])
-
-        yield seq
-
 def main():
     init()
-    train_iter, valid_iter, encoder_vocab, decoder_vocab = preprocess()
+    train_iter, valid_iter, encoder_vocab, decoder_vocab = preprocess(
+        src_vocab_path = 'data/run/example.vocab.src',
+        tgt_vocab_path = 'data/run/example.vocab.tgt',
+        src_train = 'data/neural_oie.sent',
+        tgt_train = 'data/neural_oie.triple',
+        src_val = 'data/neural_oie.sent',
+        tgt_val = 'data/neural_oie.triple',
+        device_num = -1, # On server: 0
+    )
     trainer = create_trainer(
         encoder_vocab = encoder_vocab,
         decoder_vocab = decoder_vocab,
