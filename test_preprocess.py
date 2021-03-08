@@ -80,7 +80,7 @@ def preprocess():
         data_type = 'text'
     )
     # make sure the iteration happens on GPU 0 (-1 for CPU, N for GPU N)
-    train_iter = iter(onmt.inputters.inputter.IterOnDevice(train_iter, 0))
+    train_iter = iter(onmt.inputters.inputter.IterOnDevice(train_iter, -1))
 
     # build the validation iterator
     valid_iter = DynamicDatasetIter(
@@ -98,7 +98,7 @@ def preprocess():
         batch_size_multiple = 1,
         data_type = 'text'
     )
-    valid_iter = onmt.inputters.inputter.IterOnDevice(valid_iter, 0)
+    valid_iter = onmt.inputters.inputter.IterOnDevice(valid_iter, -1)
 
     return train_iter, valid_iter, src_vocab, tgt_vocab
 

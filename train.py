@@ -67,7 +67,7 @@ def create_trainer(
     optimizer = onmt.utils.Optimizer(
         optimizer = torch.optim.SGD(model.parameters(), lr = 1),
         learning_rate = 1,
-        learning_rate_decay_fn = lambda n: 1 if n < 11 else 0.7 ** (n - 10),
+        learning_rate_decay_fn = lambda n: 1,
     )
 
     # Set the loss function
@@ -80,18 +80,29 @@ def create_trainer(
         generator = model.generator
     )
 
+    # Reports
+    report_manager = onmt.utils.ReportMgr(
+        report_every = 50,
+        start_time = None,
+        tensorboard_writer = None
+    )
+
     # Finally get the trainer
     return onmt.Trainer(
         model = model,
         optim = optimizer,
         train_loss = loss,
         valid_loss = loss,
+        report_manager = report_manager,
     )
 
 def init():
     # Random seeds
     is_cuda = torch.cuda.is_available()
     onmt.utils.misc.set_random_seed(1000, is_cuda)
+
+    # Init logger
+    onmt.utils.logging.init_logger()
 
 def batch_gen(data, padding_idx = 0, batch_size = 64):
     pos = 0
