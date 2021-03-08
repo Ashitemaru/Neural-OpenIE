@@ -1,6 +1,7 @@
 import torch
 import onmt
-from test_preprocess import preprocess
+from tqdm import tqdm
+from preprocess import preprocess
 
 # Create an NMT model
 def create_model(
@@ -88,7 +89,7 @@ def create_trainer(
     )
 
     # Finally get the trainer
-    return onmt.Trainer(
+    return model, onmt.Trainer(
         model = model,
         optim = optimizer,
         train_loss = loss,
@@ -105,6 +106,9 @@ def init():
     onmt.utils.logging.init_logger()
 
 def main():
+    # Some variables
+    epoch = 40
+
     init()
     train_iter, valid_iter, encoder_vocab, decoder_vocab = preprocess(
         src_vocab_path = 'data/run/example.vocab.src',
@@ -115,18 +119,20 @@ def main():
         tgt_val = 'data/neural_oie.triple',
         device_num = -1, # On server: 0
     )
-    trainer = create_trainer(
+    model, trainer = create_trainer(
         encoder_vocab = encoder_vocab,
         decoder_vocab = decoder_vocab,
         device = 'cuda' if torch.cuda.is_available() else 'cpu'
     )
 
-    trainer.train(
-        train_iter = train_iter,
-        train_steps = 1000,
-        valid_iter = valid_iter,
-        valid_steps = 500,
-    )
+    for i in tqdm(range(epoch)):
+        trainer.train(
+            train_iter = train_iter,
+            train_steps = 10,
+            valid_iter = valid_iter,
+            valid_steps = 5,
+        )
+        torch.save(model.state_dict(), "./openie-model-%d.pth" % epoch)
 
 if __name__ == '__main__':
     main()
