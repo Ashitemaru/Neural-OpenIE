@@ -12,11 +12,9 @@ def preprocess(
     src_train, tgt_train,
     src_val, tgt_val,
     src_vocab_path, tgt_vocab_path,
-    device_num = 0,
-    train_num = 100000,
+    train_batch_size, valid_batch_size,
+    device_code, train_num,
     vocab_max_size = 800000,
-    train_batch_size = 4096,
-    valid_batch_size = 8,
 ):
     onmt.utils.logging.init_logger()
 
@@ -92,7 +90,7 @@ def preprocess(
     )
 
     # Make sure the iteration happens on GPU 0 (-1 for CPU, N for GPU N)
-    train_iter = iter(onmt.inputters.inputter.IterOnDevice(train_iter, device_num))
+    train_iter = iter(onmt.inputters.inputter.IterOnDevice(train_iter, device_code))
 
     # build the validation iterator
     valid_iter = DynamicDatasetIter(
@@ -110,7 +108,7 @@ def preprocess(
         batch_size_multiple = 1,
         data_type = 'text'
     )
-    valid_iter = onmt.inputters.inputter.IterOnDevice(valid_iter, device_num)
+    valid_iter = onmt.inputters.inputter.IterOnDevice(valid_iter, device_code)
 
     return train_iter, valid_iter, src_vocab, tgt_vocab
 

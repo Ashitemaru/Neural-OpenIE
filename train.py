@@ -1,5 +1,7 @@
 import torch
 import onmt
+import os
+import pathlib
 from tqdm import tqdm
 from preprocess import preprocess
 
@@ -105,9 +107,15 @@ def init():
     # Init logger
     onmt.utils.logging.init_logger()
 
+    # Init folders
+    if not pathlib.Path('./model').is_dir():
+        os.system('mkdir model')
+
 def main():
     # Some variables
-    epoch = 40
+    epoch = 10
+    train_batch_size = 256
+    valid_batch_size = 8
 
     init()
     train_iter, valid_iter, encoder_vocab, decoder_vocab = preprocess(
@@ -117,7 +125,10 @@ def main():
         tgt_train = 'data/neural_oie.triple',
         src_val = 'data/neural_oie.sent',
         tgt_val = 'data/neural_oie.triple',
-        device_num = -1, # On server: 0
+        device_code = -1, # On server: 0
+        train_batch_size = train_batch_size,
+        valid_batch_size = valid_batch_size,
+        train_num = epoch * train_batch_size,
     )
     model, trainer = create_trainer(
         encoder_vocab = encoder_vocab,
@@ -126,13 +137,24 @@ def main():
     )
 
     for i in tqdm(range(epoch)):
+        '''
         trainer.train(
             train_iter = train_iter,
-            train_steps = 10,
+            train_steps = train_batch_size,
             valid_iter = valid_iter,
-            valid_steps = 5,
+            valid_steps = valid_batch_size,
         )
-        torch.save(model.state_dict(), "./openie-model-%d.pth" % epoch)
+        '''
+
+        # Save parameters
+        os.system('touch ./model/openie-model-%d.pth' % i)
+        torch.save(model.state_dict(), './model/openie-model-%d.pth' % i)
+        with open('./model/openie-model-%d.txt' % i, 'w') as f:
+            f.write(str(model.state_dict()))
+
+    # Clear vocabs
+    os.system('rm -r data/run')
+    return
 
 if __name__ == '__main__':
     main()
