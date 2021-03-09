@@ -2,7 +2,6 @@ import torch
 import onmt
 import os
 import pathlib
-from tqdm import tqdm
 from preprocess import preprocess
 
 # Create an NMT model
@@ -57,6 +56,7 @@ def create_trainer(
     encoder_vocab, decoder_vocab, device,
     decoder_hidden_size = 256,
     embedding_padding_idx = 0,
+    report_every = 50,
 ):
     # Get the model
     model = create_model(
@@ -85,7 +85,7 @@ def create_trainer(
 
     # Reports
     report_manager = onmt.utils.ReportMgr(
-        report_every = 50,
+        report_every = report_every,
         start_time = None,
         tensorboard_writer = None
     )
@@ -110,6 +110,8 @@ def init():
     # Init folders
     if not pathlib.Path('./model').is_dir():
         os.system('mkdir model')
+    if pathlib.Path('./data/run').is_dir():
+        os.system('rm -r ./data/run')
 
 def main():
     # Some variables
@@ -133,18 +135,18 @@ def main():
     model, trainer = create_trainer(
         encoder_vocab = encoder_vocab,
         decoder_vocab = decoder_vocab,
-        device = 'cuda' if torch.cuda.is_available() else 'cpu'
+        device = 'cuda' if torch.cuda.is_available() else 'cpu',
+        report_every = 1,
     )
 
-    for i in tqdm(range(epoch)):
-        '''
+    for i in range(epoch):
+        # Train
         trainer.train(
             train_iter = train_iter,
             train_steps = train_batch_size,
             valid_iter = valid_iter,
             valid_steps = valid_batch_size,
         )
-        '''
 
         # Save parameters
         os.system('touch ./model/openie-model-%d.pth' % i)
