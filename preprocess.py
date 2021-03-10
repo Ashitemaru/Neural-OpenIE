@@ -16,12 +16,12 @@ def preprocess(
     device_code, train_num,
     vocab_max_size = 800000,
 ):
-    onmt.utils.logging.init_logger()
+    # onmt.utils.logging.init_logger()
 
     # Build the vocabs
     parser = ArgumentParser(description = 'build_vocab.py')
     dynamic_prepare_opts(parser, build_vocab_only = True)
-    base_args = (['-config', 'data/config.yaml', '-n_sample', str(train_num)])
+    base_args = (['-config', '/data7/private/qianhoude/data/config.yaml', '-n_sample', str(train_num)])
     opts, unknown = parser.parse_known_args(base_args)
     build_vocab_main(opts)
 

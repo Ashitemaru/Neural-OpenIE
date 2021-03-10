@@ -2,6 +2,7 @@ import torch
 import onmt
 import os
 import pathlib
+from tqdm import tqdm
 from preprocess import preprocess
 
 # Create an NMT model
@@ -105,29 +106,31 @@ def init():
     onmt.utils.misc.set_random_seed(1000, is_cuda)
 
     # Init logger
-    onmt.utils.logging.init_logger()
+    # onmt.utils.logging.init_logger()
 
     # Init folders
     if not pathlib.Path('./model').is_dir():
         os.system('mkdir model')
-    if pathlib.Path('./data/run').is_dir():
-        os.system('rm -r ./data/run')
+    if pathlib.Path('/data7/private/qianhoude/data/run').is_dir():
+        os.system('rm -r /data7/private/qianhoude/data/run')
 
 def main():
     # Some variables
-    epoch = 10
-    train_batch_size = 256
-    valid_batch_size = 8
+    epoch = 40
+    train_batch_size = 32
+    valid_batch_size = 10
+    train_batch_every_epoch = 32
+    report_every = 5
 
     init()
     train_iter, valid_iter, encoder_vocab, decoder_vocab = preprocess(
-        src_vocab_path = 'data/run/example.vocab.src',
-        tgt_vocab_path = 'data/run/example.vocab.tgt',
-        src_train = 'data/neural_oie.sent',
-        tgt_train = 'data/neural_oie.triple',
-        src_val = 'data/neural_oie.sent',
-        tgt_val = 'data/neural_oie.triple',
-        device_code = -1, # On server: 0
+        src_vocab_path = '/data7/private/qianhoude/data/run/example.vocab.src',
+        tgt_vocab_path = '/data7/private/qianhoude/data/run/example.vocab.tgt',
+        src_train = '/data7/private/qianhoude/data/neural_oie.sent',
+        tgt_train = '/data7/private/qianhoude/data/neural_oie.triple',
+        src_val = '/data7/private/qianhoude/data/neural_oie.sent',
+        tgt_val = '/data7/private/qianhoude/data/neural_oie.triple',
+        device_code = 2, # On server: 0
         train_batch_size = train_batch_size,
         valid_batch_size = valid_batch_size,
         train_num = epoch * train_batch_size,
@@ -135,18 +138,21 @@ def main():
     model, trainer = create_trainer(
         encoder_vocab = encoder_vocab,
         decoder_vocab = decoder_vocab,
-        device = 'cuda' if torch.cuda.is_available() else 'cpu',
-        report_every = 1,
+        device = 'cuda:2' if torch.cuda.is_available() else 'cpu',
+        report_every = report_every,
     )
 
     for i in range(epoch):
-        # Train
-        trainer.train(
-            train_iter = train_iter,
-            train_steps = train_batch_size,
-            valid_iter = valid_iter,
-            valid_steps = valid_batch_size,
-        )
+        for j in tqdm(range(train_batch_every_epoch)):
+            # Train
+            static = trainer.train(
+                train_iter = train_iter,
+                train_steps = train_batch_size,
+                valid_iter = valid_iter,
+                valid_steps = valid_batch_size,
+            )
+
+            print('Now accuracy is %d%%.' % static.accuracy())
 
         # Save parameters
         os.system('touch ./model/openie-model-%d.pth' % i)
@@ -155,7 +161,7 @@ def main():
             f.write(str(model.state_dict()))
 
     # Clear vocabs
-    os.system('rm -r data/run')
+    os.system('rm -r /data7/private/qianhoude/data/run')
     return
 
 if __name__ == '__main__':
