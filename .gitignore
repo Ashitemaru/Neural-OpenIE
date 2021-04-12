@@ -1,2 +1,5 @@
 __pycache__/
 data/
+**/openie_model/
+**/fewrel_model/
+**/fewrel_finetune_model/
