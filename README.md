@@ -1,5 +1,11 @@
 # Neural Open Information Extraction
 
-This repository stores codes that I use to reproduce the paper *Neural Open Information Extraction*.
+This repository stores codes that I use for *Open Relation Extraction*(The work I am doing in THUNLP).
 
-Now I have completed the modules with OpenNMT. Preprocessing is under construction.
+## First stage
+
+Try to reproduce the paper *Neural Open Information Extraction*. I have used OpenNMT and Transformers for it. The codes are stored in `OpenNMT-version` and `Transformers-version` folder.
+
+## Second stage
+
+Use BART to do open relation extraction. Using The dataset FewRel now.
