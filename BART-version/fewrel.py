@@ -69,8 +69,8 @@ def train_epoch(model, device, epoch, sent_handler, rela_handler, tokenizer):
     optimizer = torch.optim.SGD(params = model.parameters(), lr = 0.005 * (0.7 ** max(0, epoch - 10)))
 
     # Get the batch & Set variables
-    batch_size = 8
-    full_data_size = 414
+    batch_size = 16
+    full_data_size = 44800
     batch_num = int(full_data_size / batch_size)
     loss_sum = 0
 
@@ -99,7 +99,7 @@ def test_epoch(model, device, epoch, sent_handler, rela_handler, tokenizer):
     print('\033[0;36;40m- Evaluation started!\033[0m\n')
     
     # Set variables
-    full_data_size = 274
+    full_data_size = 11200
     smooth = SmoothingFunction()
     total_score = 0
 
@@ -143,8 +143,8 @@ def test_epoch(model, device, epoch, sent_handler, rela_handler, tokenizer):
 
 def init():
     # Init folders
-    if not pathlib.Path('/home/qianhoude/Neural-OpenIE/BART-version/fewrel_model').is_dir():
-        os.system('mkdir fewrel_model')
+    if not pathlib.Path('/home/qianhoude/Neural-OpenIE/BART-version/full_fewrel_model').is_dir():
+        os.system('mkdir full_fewrel_model')
 
 def main():
     # Init
@@ -173,7 +173,7 @@ def main():
         now_res = test_epoch(model, device, epoch_num, test_sent_handler, test_rela_handler, tokenizer)
 
         # Save the model parameters
-        torch.save(model, './fewrel_model/IEModel-%d.pth' % epoch_num)
+        torch.save(model, './full_fewrel_model/IEModel-%d.pth' % epoch_num)
 
         # Assertion
         res = [val == now_res[i] for i, val in enumerate(prev_res)]
