@@ -4,3 +4,4 @@ data/
 **/fewrel_model/
 **/full_fewrel_model/
 **/fewrel_finetune_model/
+**/fewrel_model_t5/

@@ -9,3 +9,9 @@ Try to reproduce the paper *Neural Open Information Extraction*. I have used Ope
 ## Second stage
 
 Use BART to do open relation extraction. Using The dataset FewRel now.
+
+## Third stage
+
+Now trying T5 to enhance the model. Moreover, trying to use `prompt` and `beam search` to enhance the model.
+
+The dataset is still FewRel.
